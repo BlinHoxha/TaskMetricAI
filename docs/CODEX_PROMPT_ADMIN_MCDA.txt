@@ -1,0 +1,13 @@
+TaskMetric AI — administrator-controlled MCDA profile amendment
+
+I have added `docs/12_ADMIN_CONTROLLED_MCDA_PROFILES.md` to the TaskMetricAI repository. Read it alongside `AGENTS.md`, the existing v1.1 docs, and `11_ARCHITECTURAL_ASSESSMENT_AND_IMPLEMENTATION_PLAN.md`.
+
+This is an approved product direction: criterion weights and their distribution are determined by authorized system administrators/evaluation managers, NEVER autonomously by AI. The AI may propose task-specific criterion scores and explanations, but cannot change the weight policy. Profiles, rubric anchors, complexity bands, and optional story-point mappings must be versioned and configurable.
+
+FIRST: reconcile the new addendum with the existing specifications. Update affected documentation, AGENTS.md, and the Codex implementation plan, and create an ADR covering profile ownership, immutable versioning, strict weight-sum validation, zero-weight unknown handling, scope precedence, and deterministic sensitivity precision. Preserve existing architecture and avoid adding a standalone frontend.
+
+THEN: implement M0 and M1 ONLY, using the approved architectural assessment. Build a pure C# deterministic MCDA library with immutable profile contracts, decimal weighted scoring, validation, configurable bands and mappings, provisional unknown ranges, contribution breakdown, and sensitivity analysis. Add comprehensive xUnit tests for boundary cases, invalid distributions, immutability, and the reference vectors.
+
+Do NOT implement Jira/Forge, GitHub, AI orchestration, PostgreSQL, profile administration APIs, or a dashboard in this milestone. Do not hardcode the example weights as the only allowed profile. Do not silently normalize invalid weights. Do not convert story points into hours.
+
+Run Release build and tests, report actual commands/results, document decisions and outstanding questions, then STOP for my review before M2. If a product-policy decision remains ambiguous, ask me rather than inventing it.

@@ -1,0 +1,24 @@
+# Database Schema and Persistence Model
+
+## SaaS catalog persistence extension (M2+, no M1 schema implementation)
+
+Add tenant-owned MetricDefinitionVersion(TenantId, MetricId, Version, Kind, Label, Definition, Rubric, audit metadata) and catalog current-version selection with unique (TenantId, MetricId). Preserve old versions. Profile criterion rows embed exact definition/rubric and optional source metric tenant/ID/version, IsEnabled and weight. Scope assignments are tenant-keyed and may target organization/team/Jira-project. Every evaluation snapshot references tenant/profile/version/hash and retains exact content, accepted scores and result. Never dereference latest definitions to reconstruct history. Use tenant-aware relationships, cache keys, authorization and tests; standard template copies are independent. No fixed eight-column schema and no catalog microservice. See docs/14 and ADR 0004.
+
+## Main entities
+Tenant(Id, JiraCloudId, CreatedAt); JiraConnection(Id, TenantId, SiteUrl, TokenReference, Scopes); RepositoryConnection(Id, TenantId, Provider, ExternalRepoId, TokenReference); RepositoryMapping(Id, TenantId, JiraProjectId, ComponentId nullable, RepositoryConnectionId, Branch, Priority);
+EvaluationProfileVersion(TenantId, ProfileId, Version, Name, Description, ScopeType, ScopeId, Status, WeightPercentageDecimalPlaces, ScoringPolicyVersion, SensitivityPolicyVersion, ContentHash, CanonicalSnapshot, CreatedBy, CreatedAt, ApprovedBy, ApprovedAt, ChangeReason, UsedAt nullable); CriterionDefinition(TenantId, ProfileId, ProfileVersion, Code, Label, Definition, WeightDecimal, SortOrder, RubricJson); ComplexityBand and optional StoryPointBand preserve order, stable labels/IDs and endpoint inclusivity; ProfileAssignment records explicit tenant/project/team/org assignments. Evaluation(Id, TenantId, JiraIssueId, IssueKey, RepositoryId, CommitSha, ProfileId, ProfileVersion, ProfileHash, ResolvedScope, State, IssueSnapshotHash, ModelVersion, PromptVersion, EngineVersion, WeightedScore nullable, NormalizedIndex nullable, CreatedBy, CreatedAt); CriterionAssessment preserves proposals; append-only AssessmentRevision/OverrideEvent preserves previous/new values and actor/time/reason. Evidence(Id, TenantId, EvaluationId, Provider, CommitSha, FilePath nullable, StartLine nullable, EndLine nullable, IssueField nullable, Claim, Classification); SuggestedSubtask(Id, TenantId, EvaluationId, Title, Description, Classification); PublicationAttempt binds evaluation revision/content hash/destination/approval and records uncertain outcomes; AuditEvent(Id, TenantId, ActorId, EventType, SubjectId, Scope, MetadataJson, OccurredAt). These are M2+ design contracts, not M1 tables.
+
+## Relationships and constraints
+Every row and relationship is tenant-scoped. Unique (TenantId, ProfileId, Version); unique criterion code within that version; at most one active assignment per effective scope. Cache identity includes repo ID/SHA, issue snapshot, profile ID/version/hash, analyzer/model/prompt/engine policy versions and tenant/installation. Reauthorize cache reads. Unique publication idempotency key plus remote-write reconciliation. Weight sum=1 validated before activation/use with no repair. Decimal weights use approved precision. Canonical hash excludes lifecycle/audit metadata so archiving does not change historical content identity. Preserve exact evaluation profile snapshot and weights.
+
+## State transitions
+Execution: Requested → Running → Completed / Failed / Cancelled. Evidence completeness, review revision and publication status are separate. Re-evaluation creates a new attempt; never overwrite history. Profile lifecycle: Draft → Validated → Active → Archived. Activated or used content is immutable; changes clone a new draft version. Archive rather than delete active/used versions. Approval and publication are audited and bound to exact revision/content; overrides invalidate approval. Enforce optimistic concurrency and transactional activation. Authentication/authorization are M2+.
+
+## Retention
+Configurable evaluation/source snippet retention; prefer pointers and hashes over persistent full code copies. Encrypt provider secrets via managed secret store. Allow tenant export and deletion, with audit retention according to policy.
+
+## Migration order
+From M2: tenants/connections → profiles/criteria/bands/assignments → repository mappings → evaluations/revisions/evidence → publication/audit. An illustrative profile may be offered as an administrator-reviewed draft; never automatically activate mandatory example weights.
+
+## v1.1 UI and workflow persistence
+Persist evaluation status, workflow step and failure code, source snapshot SHA, criterion proposals, user overrides and rationale, approval actor/time, publication idempotency key, and published Jira reference. Do not persist Forge presentation state as a separate frontend user account.

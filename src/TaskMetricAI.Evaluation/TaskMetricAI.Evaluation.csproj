@@ -1,0 +1,5 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <Description>Provider-independent deterministic MCDA scoring for immutable administrator-defined profiles.</Description>
+  </PropertyGroup>
+</Project>
