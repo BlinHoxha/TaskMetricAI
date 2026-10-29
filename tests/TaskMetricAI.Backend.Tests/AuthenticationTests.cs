@@ -22,6 +22,10 @@ public sealed class AuthenticationTests
         var identity = await verifier.VerifyAsync(Token(key));
         Assert.Equal("actor", identity.ActorId);
         Assert.Equal("installation", identity.InstallationId);
+        Assert.Equal("app-id", identity.AppId);
+        Assert.Equal("environment", identity.EnvironmentId);
+        Assert.Equal("DEVELOPMENT", identity.EnvironmentType);
+        Assert.Equal("11111111-1111-1111-1111-111111111111", identity.CloudId);
         foreach (var token in new[]
         {
             Token(new RsaSecurityKey(other) { KeyId = "other" }), Token(key, audience: "wrong"),
@@ -53,8 +57,14 @@ public sealed class AuthenticationTests
         var now = DateTime.UtcNow;
         var payload = new JwtPayload(issuer, audience, [], now.AddMinutes(-10), expired ? now.AddMinutes(-5) : now.AddMinutes(5))
         {
-            ["app"] = new { id = appId, installationId = "installation", environment = new { id = "environment", type = env } },
-            ["context"] = new { cloudId = cloud ?? "11111111-1111-1111-1111-111111111111" }, ["principal"] = actor
+            ["app"] = new Dictionary<string, object>
+            {
+                ["id"] = appId,
+                ["installationId"] = "installation",
+                ["environment"] = new Dictionary<string, object> { ["id"] = "environment", ["type"] = env }
+            },
+            ["context"] = new Dictionary<string, object> { ["cloudId"] = cloud ?? "11111111-1111-1111-1111-111111111111" },
+            ["principal"] = actor
         };
         return new JwtSecurityTokenHandler().WriteToken(new JwtSecurityToken(new JwtHeader(new SigningCredentials(key, SecurityAlgorithms.RsaSha256)), payload));
     }
