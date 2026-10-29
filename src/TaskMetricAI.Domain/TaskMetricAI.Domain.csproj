@@ -1,3 +1,0 @@
-<Project Sdk="Microsoft.NET.Sdk">
-  <ItemGroup><ProjectReference Include="../TaskMetricAI.Evaluation/TaskMetricAI.Evaluation.csproj" /></ItemGroup>
-</Project>

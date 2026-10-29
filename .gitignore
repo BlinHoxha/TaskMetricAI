@@ -13,3 +13,9 @@ TestResults/
 *.pfx
 *.p12
 *.key
+*.pem
+*.p8
+**/secrets.json
+**/credentials.json
+**/appsettings.Development.json
+**/database-password.txt

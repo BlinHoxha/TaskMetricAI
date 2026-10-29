@@ -10,3 +10,7 @@ Prefer .NET 10 LTS. Only SDK 9.0.308 is available locally; docs/12 explicitly pe
 Production uses the .NET base libraries only (including JSON, cryptography and numerics). Tests use cached xUnit 2.9.2, runner 2.8.2 and Microsoft.NET.Test.Sdk 17.12.0. No Framework/AI-Framework references: inspected helpers provide no benefit for pure arithmetic and existing AI contracts do not supply structured criterion assessment. Reconsider adapter reuse in M4.
 
 The directory is not currently a Git repository. Prepare a GitHub Actions workflow, but do not claim a hosted run or create/publish a repository. Local Release build/test commands provide current evidence. Stop for owner review before M2.
+
+## 28 October 2026 baseline update
+
+The owner approved M1 and the .NET 10 upgrade. global.json now pins SDK 10.0.403 and Directory.Build.props targets net10.0. The original SDK 9 and pre-Git observations above are historical. The repository is associated with BlinHoxha/TaskMetricAI on GitHub. M2 is paused; its unfinished implementation is preserved on feature/m2-foundations and excluded from the master solution. See ../18_M1_NET10_BASELINE_SEPARATION.md for current verification.

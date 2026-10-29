@@ -1,7 +1,7 @@
 # M1 final source-level sign-off
 
 Date: 28 October 2026  
-Disposition: Meets approved M1 domain/scoring acceptance criteria; awaits explicit owner approval before M2
+Disposition: M1 approved by the owner. The original verification below is historical; the .NET 10 upgrade is complete and M2 is now paused. See [current baseline validation](18_M1_NET10_BASELINE_SEPARATION.md).
 
 ## Findings
 
