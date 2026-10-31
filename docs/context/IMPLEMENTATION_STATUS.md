@@ -1,10 +1,20 @@
 # Current implementation status
 
-Verified: 31 October 2026, Europe/Budapest. This document describes current source; historical counts, inventories and source hashes are not mixed into the current tables. [Report 24](../24_M2_REVIEW_CORRECTIONS.md) is the latest validation record.
+Verified: 31 October 2026, Europe/Budapest. This document describes current source; historical counts, inventories and source hashes are not mixed into the current tables. [Report 24](../24_M2_REVIEW_CORRECTIONS.md) records local validation; the hosted verification below supersedes earlier pending-CI statements.
+
+## Hosted checkpoint verification
+
+Checkpoint be1c783d6415f49e66d435558e9dec6fc3c2cd4d was published to origin/feature/m2-foundations. Its first run 41223780762 failed at a Unix-socket readiness probe; container logs were not captured, so a server crash was not established. The official image's temporary socket-only initialization server is a plausible explanation, not a proven diagnosis for that run.
+
+Owner-approved CI-only correction 692c865490374c828b94cb44dcb0f1d0ab1b5c73 changes only .github/workflows/build.yml: three consecutive container TCP probes at 127.0.0.1:5432, a 120-second readiness deadline, per-command limits, a five-minute step limit and failure diagnostics without environment/credential output. Ephemeral credentials, isolated databases and least-privileged runtime provisioning are unchanged.
+
+[Hosted Build and test run 41227998388](https://github.com/BlinHoxha/TaskMetricAI/actions/runs/41227998388) completed successfully on 31 October 2026, approximately 18:10 UTC, for that exact correction SHA. Restore and Release build passed (0 warnings/errors); disposable PostgreSQL 17 setup/runtime provisioning passed; 100 M1 and 111 backend tests passed (211 total, 0 failed/skipped); the mandatory runtime-suite/no-skip gate passed; the direct/transitive audit reported no known vulnerabilities across eight projects. Cleanup passed. Readiness probes 1–2 failed, then probes 3–5 succeeded consecutively. Action runtime Node.js deprecation warnings were non-fatal and separate from the zero-warning .NET build.
+
+Local correction checks: YAML parsing, Bash syntax, unchanged remaining workflow structure, whitespace checks and six mocked readiness scenarios passed. Docker was unavailable locally; the real disposable-container verification is hosted evidence. No new local application test run is claimed. The owner subsequently approved committing and publishing only this status document and SESSION_HANDOFF.md; no additional implementation is implied.
 
 ## Current source and authorization boundary
 
-Branch feature/m2-foundations; reviewed pre-checkpoint base 118f4c7ea05b129cd44115244bf838e18855cfae. Master remains 946eb5d049c65d157aa2fb1fd92938c61fd75443. The owner authorized one local cumulative M2 checkpoint commit; this document and [the full inventory](../25_M2_FEATURE_CHECKPOINT.md) are included in it. Identify its exact SHA with git log rather than treating the base SHA as the new tip. No push/merge/rebase/branch switch or additional implementation is authorized. Stop after the checkpoint; it is not M2 completion or production sign-off.
+Branch feature/m2-foundations; hosted-validated implementation commit is 692c865490374c828b94cb44dcb0f1d0ab1b5c73, following checkpoint be1c783d ([full inventory](../25_M2_FEATURE_CHECKPOINT.md)). The subsequent documentation-only commit contains this status document and SESSION_HANDOFF.md; use git log for its SHA. Master remains 946eb5d049c65d157aa2fb1fd92938c61fd75443. The owner authorized publishing these two reviewed documents after hosted verification. Stop for review; no merge, rebase, master change or additional M2 feature is authorized. This is not M2 completion or production sign-off.
 
 | Capability | Implemented and verified | Boundary |
 | --- | --- | --- |
@@ -19,7 +29,7 @@ Branch feature/m2-foundations; reviewed pre-checkpoint base 118f4c7ea05b129cd441
 | Grant revocation | Administrator-only exact grant, reason/audit, fresh authority queries, serialized final-admin protection | Already-authorized work may finish |
 | Configuration API | Authenticated versions/lifecycle/assignments/catalogs/metrics/grants/resolution/revocation | No public bootstrap/SQL/provider/evaluation endpoints |
 | Explicit migrations | Populated-v2 manifest provisioning, FK validation, rollback and replay tests | No automatic entitlement inference, database reset or startup migration |
-| Mandatory PostgreSQL CI | Workflow and CI-only disposable provisioning present | New hosted run/Linux bootstrap not performed |
+| Mandatory PostgreSQL CI | Disposable Linux PostgreSQL setup/runtime bootstrap and security suite passed in run 41227998388 | One verified hosted run; not production deployment validation |
 | Operator scope management | Trusted registration library and upgrade manifest support | No general scope administration UI/API |
 | Jira/GitHub integration | Ports/entities and security design only | Authorized reads and commit-pinned workflows pending |
 | Roslyn, AI, advanced UI/publication | Not implemented in these increments | Further authorization required |
@@ -28,7 +38,7 @@ Branch feature/m2-foundations; reviewed pre-checkpoint base 118f4c7ea05b129cd441
 
 Final Release build: 0 warnings/errors. Final full run: **211 passed, 0 failed, 0 skipped** (100 M1 + 111 backend). Backend: 32 offline unit/SQLite/model + 79 PostgreSQL/HTTP cases, including 37 HTTP. Backend run finished 31 October at 13:13:43 +01:00.
 
-Evidence: tests/TaskMetricAI.Evaluation.Tests/TestResults/m2-review-corrections-final.trx and tests/TaskMetricAI.Backend.Tests/TestResults/m2-review-corrections-final.trx, ignored by Git. Direct/transitive audit completed with no known vulnerable packages across eight projects. Build/audit execution and commands are recorded in docs/24; hosted CI is not claimed.
+Local evidence: tests/TaskMetricAI.Evaluation.Tests/TestResults/m2-review-corrections-final.trx and tests/TaskMetricAI.Backend.Tests/TestResults/m2-review-corrections-final.trx, ignored by Git. Direct/transitive audit completed with no known vulnerable packages across eight projects. Local build/audit execution and commands are recorded in docs/24; independent hosted evidence is recorded above.
 
 | Security regression | Source references |
 | --- | --- |
@@ -50,4 +60,4 @@ Historical evidence is intentionally retained in [docs/19](../19_M2_IDENTITY_AND
 
 ## Remaining limitations
 
-Hosted CI/fresh Linux bootstrap, live Atlassian tokens/JWKS/HTTPS, provider entitlements, evaluation-result persistence/isolation and production TLS/credential deployment remain unverified or unimplemented. Scope-manifest review is an explicit operator responsibility. No claim of complete SaaS production readiness is made.
+Live Atlassian tokens/JWKS/HTTPS, provider entitlements, evaluation-result persistence/isolation and production TLS/credential deployment remain unverified or unimplemented. Hosted CI/fresh Linux bootstrap passed for the SHA above; repeatability beyond that run is not established. Scope-manifest review is an explicit operator responsibility. No claim of complete SaaS production readiness is made.
