@@ -12,6 +12,48 @@ jobs:
       - uses: actions/setup-dotnet@v4
         with:
           global-json-file: global.json
+      - name: Start isolated PostgreSQL 17 with an ephemeral credential
+        shell: bash
+        run: |
+          set -euo pipefail
+          secrets_dir="$RUNNER_TEMP/taskmetric-secrets"
+          mkdir -m 700 "$secrets_dir"
+          admin_password="$(openssl rand -hex 32)"
+          echo "::add-mask::$admin_password"
+          printf 'POSTGRES_PASSWORD=%s\n' "$admin_password" > "$secrets_dir/postgres.env"
+          printf 'localhost:5432:postgres:postgres:%s\n' "$admin_password" > "$secrets_dir/admin.pgpass"
+          printf 'Host=localhost;Database=postgres;Username=postgres;Passfile=%s/admin.pgpass;Include Error Detail=false' "$secrets_dir" > "$secrets_dir/admin.connection"
+          chmod 600 "$secrets_dir"/*
+          docker run --detach --name taskmetric-postgres --publish 127.0.0.1:5432:5432 --env-file "$secrets_dir/postgres.env" postgres:17
+          for attempt in {1..60}; do
+            if docker exec taskmetric-postgres pg_isready -U postgres; then break; fi
+            sleep 1
+          done
+          docker exec taskmetric-postgres pg_isready -U postgres
+          echo "TASKMETRICAI_TEST_CONNECTION_FILE=$secrets_dir/taskmetricai_test.connection" >> "$GITHUB_ENV"
+          echo "TASKMETRICAI_RUNTIME_TEST_CONNECTION_FILE=$secrets_dir/taskmetric_runtime_test.connection" >> "$GITHUB_ENV"
       - run: dotnet restore TaskMetricAI.sln
       - run: dotnet build TaskMetricAI.sln -c Release --no-restore
-      - run: dotnet test TaskMetricAI.sln -c Release --no-build --no-restore
+      - name: Provision disposable CI setup and runtime identities
+        run: dotnet run --project tools/TaskMetricAI.Database -c Release --no-build --no-restore -- provision-ci "$RUNNER_TEMP/taskmetric-secrets/admin.connection" "$RUNNER_TEMP/taskmetric-secrets"
+      - name: Run all unit, HTTP and mandatory PostgreSQL security tests
+        run: dotnet test TaskMetricAI.sln -c Release --no-build --no-restore --logger 'trx;LogFileName=ci-security.trx'
+      - name: Reject skipped tests or a missing runtime security suite
+        shell: python
+        run: |
+          import glob, xml.etree.ElementTree as ET
+          reports = glob.glob('tests/**/TestResults/ci-security.trx', recursive=True)
+          assert len(reports) == 2, 'Both test suites must publish results'
+          runtime_suite = False
+          for report in reports:
+              root = ET.parse(report).getroot()
+              counters = root.find('.//{*}Counters').attrib
+              assert int(counters['failed']) == 0 and int(counters['notExecuted']) == 0, 'Skipped security tests are forbidden'
+              for method in root.findall('.//{*}TestMethod'):
+                  runtime_suite |= method.attrib.get('className', '').endswith('.RuntimeSecurityTests')
+          assert runtime_suite, 'Runtime-role security tests did not execute'
+      - name: Audit direct and transitive dependencies
+        run: dotnet package list --project TaskMetricAI.sln --vulnerable --include-transitive --no-restore
+      - name: Remove disposable PostgreSQL container
+        if: always()
+        run: docker rm --force taskmetric-postgres

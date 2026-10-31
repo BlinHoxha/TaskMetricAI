@@ -1,6 +1,6 @@
 # ADR 0005: M2 identity, persistence and read-only providers
 
-Status: Preserved architectural direction; M2 implementation paused pending explicit owner approval. This draft is not an implementation sign-off.
+Status: Identity/authorization/configuration-persistence increment authorized on 29 October 2026; provider implementation remains deferred. ADR 0006 records the current bounded increment. This is not a full M2 sign-off.
 
 Keep a modular monolith and existing pure Evaluation library. Application workflows depend on tenant-aware repository/provider ports; Infrastructure supplies EF Core/Npgsql, Forge JWT verification and fixed-host HTTP adapters. API composes them. No shared Framework CRUD controllers: scoped lifecycle/version/audit rules need explicit operations. No AI-Framework dependency is useful here.
 

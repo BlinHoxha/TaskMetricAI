@@ -1,5 +1,11 @@
 # Database Schema and Persistence Model
 
+## Current local schema version 3
+
+31 October corrections: [docs/24](24_M2_REVIEW_CORRECTIONS.md) adds mandatory runtime schema/grant/isolation checks, SELECT-only schema metadata and explicit manifest-driven populated-v2 upgrade support. Schema version remains 3. Missing manifest entries abort and roll back rather than inventing scope registrations; data/history remain intact.
+
+See [ADR 0008](adr/0008-profile-resolution-entitlements-and-revocation.md) and [docs/23](23_M2_PROFILE_RESOLUTION_AND_REVOCATION.md). ProjectRegistration/TeamRegistration add two FORCE-RLS tenant tables (14 total). ProjectTeam has composite tenant-aware foreign keys to both. Runtime receives registration/mapping SELECT and ScopeGrant DELETE; operator-only provisioning writes registrations/mappings. No historical grants are converted into registrations and no evaluation-result tables are implemented. Migration/grants are explicit operator actions, not API startup behavior. Earlier schema/version descriptions below are historical/design context.
+
 ## SaaS catalog persistence extension (M2+, no M1 schema implementation)
 
 Add tenant-owned MetricDefinitionVersion(TenantId, MetricId, Version, Kind, Label, Definition, Rubric, audit metadata) and catalog current-version selection with unique (TenantId, MetricId). Preserve old versions. Profile criterion rows embed exact definition/rubric and optional source metric tenant/ID/version, IsEnabled and weight. Scope assignments are tenant-keyed and may target organization/team/Jira-project. Every evaluation snapshot references tenant/profile/version/hash and retains exact content, accepted scores and result. Never dereference latest definitions to reconstruct history. Use tenant-aware relationships, cache keys, authorization and tests; standard template copies are independent. No fixed eight-column schema and no catalog microservice. See docs/14 and ADR 0004.
@@ -22,3 +28,7 @@ From M2: tenants/connections → profiles/criteria/bands/assignments → reposit
 
 ## v1.1 UI and workflow persistence
 Persist evaluation status, workflow step and failure code, source snapshot SHA, criterion proposals, user overrides and rationale, approval actor/time, publication idempotency key, and published Jira reference. Do not persist Forge presentation state as a separate frontend user account.
+
+## Implemented local schema version 2 (30 October 2026)
+
+ADR 0007 and docs/21 supersede the earlier conceptual schema where applicable. Version 2 adds tenant/organization registration with a composite installation FK, structured administrative audit fields, catalog metric identity checks and database-serialized assignment/archive invariants. Existing immutable rows are retained. Runtime roles do not own tables or migrate schema; only the explicit operator tool performs local migrations/grants. Installation lookup is a restricted fixed-search-path function, not a public registration API. RLS is forced on every tenant configuration table; transaction-local tenant selection originates in verified binding. Evaluation-result tables and effective-scope resolution remain unimplemented.

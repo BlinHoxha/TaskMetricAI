@@ -40,6 +40,7 @@ public sealed class AuthenticationTests
     {
         var identity = new TenantIdentity("tenant-a", "org", "manager", "cloud", "install", "app", "env");
         var store = new MemoryStore(identity.TenantId);
+        store.Add(new TeamRegistration { TenantId = "tenant-a", Id = "team-a" });
         store.Add(new ScopeGrant { TenantId = "tenant-a", ActorId = "manager", Role = AccessRole.EvaluationManager,
             ScopeType = ScopeType.Team, ScopeId = "team-a" });
         store.Add(new ScopeGrant { TenantId = "tenant-b", ActorId = "manager", Role = AccessRole.SystemAdministrator,
@@ -78,6 +79,7 @@ public sealed class AuthenticationTests
 
 internal sealed class MemoryStore(string tenant) : ITenantRepository
 {
+    public string TenantId => tenant;
     private readonly List<TenantEntity> entities = [];
     public Task<IReadOnlyList<T>> FindAsync<T>(Expression<Func<T, bool>> predicate, CancellationToken cancellationToken = default) where T : TenantEntity =>
         Task.FromResult<IReadOnlyList<T>>(entities.OfType<T>().Where(e => e.TenantId == tenant).Where(predicate.Compile()).ToArray());

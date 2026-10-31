@@ -19,3 +19,8 @@ TestResults/
 **/credentials.json
 **/appsettings.Development.json
 **/database-password.txt
+*.connection
+*.pgpass
+.pgpass
+pgpass.conf
+postgres.env

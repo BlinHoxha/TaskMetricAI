@@ -1,8 +1,12 @@
 # M2 plan and prerequisites
 
-Status: PAUSED. Preserved unfinished draft; owner approval is required before resuming M2.
+Status: Owner authorized the identity/authorization/PostgreSQL configuration increment on 29 October 2026, on feature/m2-foundations only. See docs/19_M2_IDENTITY_AND_PERSISTENCE_INCREMENT.md for current implementation and verification gaps. The owner subsequently authorized the bounded security-hardening/HTTP increment on 30 October 2026; docs/21 and ADR 0007 record its current scope and results. Further increments require review.
 
 ## Scope
+
+Latest bounded correction: [docs/24](24_M2_REVIEW_CORRECTIONS.md) resolves startup preconditions, populated migration and deterministic final-admin concurrency review findings. Current status and fresh evidence are in docs/context/IMPLEMENTATION_STATUS.md; reports 19–23 are historical increment records. Stop for review before publication or additional M2 work.
+
+Latest local increment: [profile resolution, local entitlements and revocation](23_M2_PROFILE_RESOLUTION_AND_REVOCATION.md), under owner-approved ADR 0008. Full M2/provider work and hosted verification remain incomplete. Docs/22 records the preceding API-boundary increment.
 
 1. Install/use an official checksum-verified .NET 10 LTS SDK locally if absent, pin SDK/target, and pass the complete M1 regression suite.
 2. Add lightweight Domain/Application/Infrastructure/Api projects. Preserve the dependency-free metric-agnostic Evaluation project and existing Forge starter.

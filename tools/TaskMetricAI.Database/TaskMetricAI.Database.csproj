@@ -1,0 +1,4 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup><OutputType>Exe</OutputType></PropertyGroup>
+  <ItemGroup><ProjectReference Include="../../src/TaskMetricAI.Infrastructure/TaskMetricAI.Infrastructure.csproj" /></ItemGroup>
+</Project>

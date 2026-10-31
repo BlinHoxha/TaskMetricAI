@@ -1,5 +1,7 @@
 # TaskMetric AI
 
+Current local M2 evidence: [review corrections](docs/24_M2_REVIEW_CORRECTIONS.md), [implementation status](docs/context/IMPLEMENTATION_STATUS.md) and the [owner-approved local checkpoint](docs/25_M2_FEATURE_CHECKPOINT.md). Startup/schema/grant/isolation checks, populated migration and final-admin lock tests are locally validated (211 passing tests); hosted/live-provider verification is pending. The checkpoint is not full M2 completion or production readiness.
+
 **Jira Cloud + GitHub + .NET repository intelligence + explainable MCDA evaluation.**
 
 ## Goal
@@ -22,11 +24,11 @@ This is TaskMetric AI, not the full DevScope AI platform. Documentation generati
 
 ## Approved administrator-controlled profiles and current scope
 
-Read [the profile addendum](docs/12_ADMIN_CONTROLLED_MCDA_PROFILES.md), [reconciled assessment](docs/11_ARCHITECTURAL_ASSESSMENT_AND_IMPLEMENTATION_PLAN.md), and [ADRs](docs/adr/0001-admin-controlled-profiles.md). Authorized administrators/evaluation managers own profile weights, rubrics, bands and mappings; AI proposes scores only. M0/M1 are approved. M2 implementation is paused pending explicit owner approval. No standalone frontend or external integrations are included in this increment.
+Read [the profile addendum](docs/12_ADMIN_CONTROLLED_MCDA_PROFILES.md), [reconciled assessment](docs/11_ARCHITECTURAL_ASSESSMENT_AND_IMPLEMENTATION_PLAN.md), and [ADRs](docs/adr/0001-admin-controlled-profiles.md). Authorized administrators/evaluation managers own profile weights, rubrics, bands and mappings; AI proposes scores only. M0/M1 are approved. The M2 identity/persistence and bounded HTTP/runtime security increment is implemented locally on feature/m2-foundations; see [the security-hardening report](docs/21_M2_SECURITY_HARDENING_REPORT.md). Further work awaits owner review. No standalone frontend or external integrations are included in this increment.
 
 ## Build and use M1
 
-M1 is approved; see the [final M1 sign-off](docs/16_M1_FINAL_SIGN_OFF.md) for source/test references and historical compatibility limits. The .NET 10 upgrade is complete. See the [baseline separation report](docs/18_M1_NET10_BASELINE_SEPARATION.md) for current validation and branch status. M2 remains paused.
+M1 is approved; see the [final M1 sign-off](docs/16_M1_FINAL_SIGN_OFF.md) for source/test references and historical compatibility limits. The .NET 10 upgrade is complete. See the [baseline separation report](docs/18_M1_NET10_BASELINE_SEPARATION.md) for current validation and branch status. The current bounded M2 increment is recorded in docs/19; master remains the approved M1 baseline.
 
 Approved [metric-agnostic SaaS amendment](docs/14_METRIC_CATALOG_AND_SAAS_AMENDMENT.md): reusable standard/custom Metric Catalog, optional eight-metric starter definitions, enabled/disabled criteria, mandatory tenant identity, new profile versions and complete immutable evaluation snapshots. Only enabled weights must total 1. The engine has no fixed metric IDs/count. See [ADR 0004](docs/adr/0004-metric-catalog-and-tenant-snapshots.md) and the [point-by-point alignment review](docs/15_METRIC_CATALOG_ALIGNMENT_REVIEW.md). Tenant authorization/storage isolation and administration remain M2+.
 
@@ -38,6 +40,10 @@ dotnet build TaskMetricAI.sln -c Release --no-restore
 dotnet test TaskMetricAI.sln -c Release --no-build --no-restore
 ```
 
-Production `TaskMetricAI.Evaluation` uses only the .NET base libraries. Tests use xUnit, its Visual Studio runner and Microsoft.NET.Test.Sdk; versions are centralized. No provider credentials, database or network are needed by the tests after package restore.
+Production `TaskMetricAI.Evaluation` uses only the .NET base libraries. Tests use xUnit, its Visual Studio runner and Microsoft.NET.Test.Sdk; versions are centralized. No provider credentials, database or network are needed by the M1 tests after package restore. PostgreSQL-specific backend cases require the isolated test connection described below.
 
-See [engine contracts and usage](docs/MCDA_ENGINE_USAGE.md), the [original M0/M1 review](docs/13_M0_M1_REVIEW.md), and the [current amendment review](docs/15_METRIC_CATALOG_ALIGNMENT_REVIEW.md). GitHub Actions builds and tests the solution. The original mixed M1/M2 commit failed hosted dependency restore; the separated baseline must pass CI after an explicitly approved push. Unfinished M2 work is preserved on feature/m2-foundations; it is not a validated implementation. The manually created/deployed Forge Hello World starter remains unchanged by this amendment.
+See [engine contracts and usage](docs/MCDA_ENGINE_USAGE.md), the [original M0/M1 review](docs/13_M0_M1_REVIEW.md), and the [current amendment review](docs/15_METRIC_CATALOG_ALIGNMENT_REVIEW.md). GitHub Actions builds and tests the solution. The M1 master baseline and the prior M2 fixture/security corrections passed GitHub Actions. The current cumulative M2 work is locally validated and included in the owner-approved feature checkpoint; no hosted verification of these new changes has occurred. The manually created/deployed Forge Hello World starter remains unchanged by this amendment.
+
+## M2 PostgreSQL test configuration
+
+The M1 suite needs no database. The full backend suite requires PostgreSQL 17 setup and runtime connection references: TASKMETRICAI_TEST_CONNECTION_FILE and TASKMETRICAI_RUNTIME_TEST_CONNECTION_FILE. See docs/21. Missing configuration fails required tests rather than skipping them. Run the Evaluation.Tests project alone for database-free M1 verification, or explicitly filter Category!=PostgreSQL for a partial offline backend run. No automatic database migration or runtime bootstrap occurs.
