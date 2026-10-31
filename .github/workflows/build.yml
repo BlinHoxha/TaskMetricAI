@@ -13,9 +13,17 @@ jobs:
         with:
           global-json-file: global.json
       - name: Start isolated PostgreSQL 17 with an ephemeral credential
+        timeout-minutes: 5
         shell: bash
         run: |
           set -euo pipefail
+          postgres_diagnostics() {
+            echo '::group::PostgreSQL startup diagnostics'
+            timeout 10s docker inspect --format 'status={{.State.Status}} exit={{.State.ExitCode}} oom={{.State.OOMKilled}} error={{.State.Error}}' taskmetric-postgres || true
+            timeout 10s docker logs --timestamps --tail 100 taskmetric-postgres || true
+            echo '::endgroup::'
+          }
+          trap postgres_diagnostics ERR
           secrets_dir="$RUNNER_TEMP/taskmetric-secrets"
           mkdir -m 700 "$secrets_dir"
           admin_password="$(openssl rand -hex 32)"
@@ -25,11 +33,32 @@ jobs:
           printf 'Host=localhost;Database=postgres;Username=postgres;Passfile=%s/admin.pgpass;Include Error Detail=false' "$secrets_dir" > "$secrets_dir/admin.connection"
           chmod 600 "$secrets_dir"/*
           docker run --detach --name taskmetric-postgres --publish 127.0.0.1:5432:5432 --env-file "$secrets_dir/postgres.env" postgres:17
-          for attempt in {1..60}; do
-            if docker exec taskmetric-postgres pg_isready -U postgres; then break; fi
-            sleep 1
+          # The image's temporary initialization server accepts Unix sockets only.
+          # Require consecutive TCP successes from the final server instead.
+          deadline=$((SECONDS + 120))
+          consecutive_ready=0
+          attempt=0
+          while (( SECONDS < deadline )); do
+            attempt=$((attempt + 1))
+            state=$(timeout 5s docker inspect --format '{{.State.Status}}' taskmetric-postgres)
+            if [[ "$state" != running ]]; then
+              echo "::error::PostgreSQL container is $state before readiness."
+              false
+            fi
+            if timeout 5s docker exec taskmetric-postgres pg_isready -h 127.0.0.1 -p 5432 -U postgres -d postgres -t 2; then
+              consecutive_ready=$((consecutive_ready + 1))
+              echo "PostgreSQL TCP probe $attempt: ready ($consecutive_ready/3 consecutive)."
+              if (( consecutive_ready == 3 )); then break; fi
+            else
+              consecutive_ready=0
+              echo "PostgreSQL TCP probe $attempt: not ready; retrying within the 120-second deadline."
+            fi
+            sleep 1 # Poll interval, never a substitute for a successful readiness check.
           done
-          docker exec taskmetric-postgres pg_isready -U postgres
+          if (( consecutive_ready < 3 )); then
+            echo '::error::PostgreSQL did not reach stable TCP readiness within 120 seconds.'
+            false
+          fi
           echo "TASKMETRICAI_TEST_CONNECTION_FILE=$secrets_dir/taskmetricai_test.connection" >> "$GITHUB_ENV"
           echo "TASKMETRICAI_RUNTIME_TEST_CONNECTION_FILE=$secrets_dir/taskmetric_runtime_test.connection" >> "$GITHUB_ENV"
       - run: dotnet restore TaskMetricAI.sln
