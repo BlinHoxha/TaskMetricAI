@@ -26,12 +26,13 @@ public sealed record TenantIdentity
     }
 }
 public sealed record VerifiedForgeIdentity(string AppId, string EnvironmentId, string EnvironmentType,
-    string InstallationId, string CloudId, string ActorId);
+    string InstallationId, string CloudId, string ActorId, string? ApiBaseUrl = null);
 
-public sealed class OperationException(int status, string code) : Exception(code)
+public sealed class OperationException(int status, string code, int? retryAfterSeconds = null) : Exception(code)
 {
     public int Status { get; } = status;
     public string Code { get; } = code;
+    public int? RetryAfterSeconds { get; } = retryAfterSeconds;
 }
 
 public static class Require

@@ -1,63 +1,62 @@
 # Current implementation status
 
-Verified: 31 October 2026, Europe/Budapest. This document describes current source; historical counts, inventories and source hashes are not mixed into the current tables. [Report 24](../24_M2_REVIEW_CORRECTIONS.md) records local validation; the hosted verification below supersedes earlier pending-CI statements.
+Verified: 1 November 2026, Europe/Budapest. This is the authoritative current source/evidence record. Read with SESSION_HANDOFF.md and ADRs 0001–0009; older reports retain dated milestone results and review gates.
 
-## Hosted checkpoint verification
+## Git and authorization
 
-Checkpoint be1c783d6415f49e66d435558e9dec6fc3c2cd4d was published to origin/feature/m2-foundations. Its first run 41223780762 failed at a Unix-socket readiness probe; container logs were not captured, so a server crash was not established. The official image's temporary socket-only initialization server is a plausible explanation, not a proven diagnosis for that run.
+Branch feature/m2-foundations; pre-publication base 6d9a0be3f4448efccc1108226c64df6cb70026f2. Final read-only review found no blockers in the 16 intended application/test/documentation files and verified all 76 new cases in the final reports. The owner authorized committing this reviewed Jira increment, a normal push to the matching origin branch, CI monitoring and evidence synchronization. Publication/CI results will be recorded after verification; identify the implementation commit with git log. Stop for approval before any CI correction. No merge, rebase, branch switch, deployment or next increment is authorized. Local and live remote master were verified at 946eb5d049c65d157aa2fb1fd92938c61fd75443 and remain unchanged.
 
-Owner-approved CI-only correction 692c865490374c828b94cb44dcb0f1d0ab1b5c73 changes only .github/workflows/build.yml: three consecutive container TCP probes at 127.0.0.1:5432, a 120-second readiness deadline, per-command limits, a five-minute step limit and failure diagnostics without environment/credential output. Ephemeral credentials, isolated databases and least-privileged runtime provisioning are unchanged.
+Published history: cumulative checkpoint be1c783d6415f49e66d435558e9dec6fc3c2cd4d ([inventory](../25_M2_FEATURE_CHECKPOINT.md)); CI-only readiness correction 692c865490374c828b94cb44dcb0f1d0ab1b5c73; documentation-only tip 6d9a0be. Fresh read-only GitHub verification found the feature branch at that same tip and [run 41229732799](https://github.com/BlinHoxha/TaskMetricAI/actions/runs/41229732799) successful for it. Logs confirm Release build with 0 warnings/errors, disposable PostgreSQL bootstrap/runtime provisioning, 100 M1 + 111 backend tests with zero failures/skips, runtime-suite gate, no known vulnerable packages across eight projects, and cleanup. The prior [run 41227998388](https://github.com/BlinHoxha/TaskMetricAI/actions/runs/41227998388) passed for 692c8654. These are baseline hosted results, not verification of the current local Jira changes.
 
-[Hosted Build and test run 41227998388](https://github.com/BlinHoxha/TaskMetricAI/actions/runs/41227998388) completed successfully on 31 October 2026, approximately 18:10 UTC, for that exact correction SHA. Restore and Release build passed (0 warnings/errors); disposable PostgreSQL 17 setup/runtime provisioning passed; 100 M1 and 111 backend tests passed (211 total, 0 failed/skipped); the mandatory runtime-suite/no-skip gate passed; the direct/transitive audit reported no known vulnerabilities across eight projects. Cleanup passed. Readiness probes 1–2 failed, then probes 3–5 succeeded consecutively. Action runtime Node.js deprecation warnings were non-fatal and separate from the zero-warning .NET build.
+The checkpoint's first run 41223780762 failed on a Unix-socket readiness probe. A PostgreSQL crash was not established; temporary initialization-server behavior remains an inference. The approved TCP-readiness correction and unchanged workflow remain in place. Non-fatal action Node.js deprecation warnings remain a separate maintenance item.
 
-Local correction checks: YAML parsing, Bash syntax, unchanged remaining workflow structure, whitespace checks and six mocked readiness scenarios passed. Docker was unavailable locally; the real disposable-container verification is hosted evidence. No new local application test run is claimed. The owner subsequently approved committing and publishing only this status document and SESSION_HANDOFF.md; no additional implementation is implied.
+## Implemented capabilities
 
-## Current source and authorization boundary
-
-Branch feature/m2-foundations; hosted-validated implementation commit is 692c865490374c828b94cb44dcb0f1d0ab1b5c73, following checkpoint be1c783d ([full inventory](../25_M2_FEATURE_CHECKPOINT.md)). The subsequent documentation-only commit contains this status document and SESSION_HANDOFF.md; use git log for its SHA. Master remains 946eb5d049c65d157aa2fb1fd92938c61fd75443. The owner authorized publishing these two reviewed documents after hosted verification. Stop for review; no merge, rebase, master change or additional M2 feature is authorized. This is not M2 completion or production sign-off.
-
-| Capability | Implemented and verified | Boundary |
+| Capability | Current evidence | Boundary |
 | --- | --- | --- |
-| M1 metric-agnostic deterministic MCDA | 100 tests passing; unchanged versus master | No required eight-metric set; pure versioned contracts |
-| .NET 10 baseline | SDK 10.0.403/net10.0, centralized versions | No dependency changes in review corrections |
-| Verified Forge installation binding | Real verifier and stored exact tenant binding exercised locally | Local signing keys; live Atlassian verification pending |
-| Tenant/scope authorization | Registered project/team scope, explicit persisted grants, fail-closed HTTP | Local operator registrations are not live Jira membership |
-| Immutable metric/catalog/profile configuration | Version/hash/provenance checks, lifecycle, revisions and append-only audits | No persisted evaluation results |
-| PostgreSQL isolation | Schema 3, 14 FORCE-RLS tenant tables, composite keys/FKs, runtime/operator separation | Custom setting trusts backend; not arbitrary SQL credential compromise |
-| Runtime preconditions | Default READ COMMITTED, exact schema 3 and required/security grants; explicit runtime transaction isolation | Startup/session reject incompatible prerequisites; SELECT-only schema metadata is non-tenant |
-| Effective profile resolution | Project > unique mapped team > organization, exact assigned Active version, snapshot/hash validation | Fallback snapshot does not grant general broader-scope reads |
-| Grant revocation | Administrator-only exact grant, reason/audit, fresh authority queries, serialized final-admin protection | Already-authorized work may finish |
-| Configuration API | Authenticated versions/lifecycle/assignments/catalogs/metrics/grants/resolution/revocation | No public bootstrap/SQL/provider/evaluation endpoints |
-| Explicit migrations | Populated-v2 manifest provisioning, FK validation, rollback and replay tests | No automatic entitlement inference, database reset or startup migration |
-| Mandatory PostgreSQL CI | Disposable Linux PostgreSQL setup/runtime bootstrap and security suite passed in run 41227998388 | One verified hosted run; not production deployment validation |
-| Operator scope management | Trusted registration library and upgrade manifest support | No general scope administration UI/API |
-| Jira/GitHub integration | Ports/entities and security design only | Authorized reads and commit-pinned workflows pending |
-| Roslyn, AI, advanced UI/publication | Not implemented in these increments | Further authorization required |
+| M1 deterministic metric-agnostic MCDA | 100 tests passing; source/tests unchanged versus master | Pure immutable versioned contracts; no provider/framework dependency |
+| .NET baseline | SDK 10.0.403 / net10.0 | No dependency/pin changes in Jira increment |
+| Verified Forge installation binding | Real verifier + exact enabled app/environment/installation/cloud directory lookup | Local signing keys in HTTP tests; live Atlassian FIT/JWKS pending |
+| Tenant/project authorization | Registered scopes, persisted actor grants, fresh authority checks, fail-closed HTTP | Registration alone grants no access; local grants do not prove Jira permissions |
+| Immutable configuration | Catalog/metric/profile version/hash/provenance, lifecycle, assignments and append-only administrative audit | Evaluation-result persistence remains absent |
+| PostgreSQL isolation | Schema 3, 14 FORCE-RLS tenant tables, composite relationships, least-privileged runtime/operator separation | Backend-selected custom-setting RLS does not protect arbitrary SQL/compromised runtime credentials |
+| Runtime prerequisites | Schema/grant/role/default READ COMMITTED checks; explicit per-operation READ COMMITTED transaction | No automatic migration/bootstrap; metadata SELECT exception remains non-tenant |
+| Profile resolution | Project > unique mapped team > organization, exact assigned Active version and validated immutable snapshot | Fallback-only access does not grant general broader-scope reads |
+| Grant revocation | Administrator-only exact grant, reason/audit, fresh authority and final-admin serialization | Already-authorized work may finish |
+| Configuration API | Versions/lifecycle/assignments/catalogs/metrics/grants/resolution/revocation | No public bootstrap, SQL or evaluation endpoint |
+| Jira issue read API | Local implementation and controlled-provider/real-PostgreSQL HTTP security verification; ADR 0009 | No live Atlassian verification, Forge remote wiring, issue/token persistence or writes |
+| GitHub workflows | Port/entities/security design only | Concrete reads, repository entitlements and commit pinning pending |
+| Operator scope registration/migration | Explicit library provisioning; populated-v2 approved-manifest rollback/replay/FK tests | No inference, general registration API/UI or Jira-increment migration |
+| Roslyn, AI, advanced UI/publication | Not implemented | Separate authorization required |
 
-## Current validation evidence
+## Bounded Jira increment
 
-Final Release build: 0 warnings/errors. Final full run: **211 passed, 0 failed, 0 skipped** (100 M1 + 111 backend). Backend: 32 offline unit/SQLite/model + 79 PostgreSQL/HTTP cases, including 37 HTTP. Backend run finished 31 October at 13:13:43 +01:00.
+GET `/api/projects/{projectId}/jira/issues/{issueId}` accepts canonical positive decimal Jira IDs (at most 20 digits), no query selectors. Tenant/actor come from the verified installation capability. Existing registered-project read authorization runs before provider requests; existing organization read/admin semantics remain. Missing/invalid FIT, unknown installation, absent/revoked/foreign grants, unknown project, missing/invalid user credential, untrusted base, actor mismatch and provider denials fail closed.
 
-Local evidence: tests/TaskMetricAI.Evaluation.Tests/TestResults/m2-review-corrections-final.trx and tests/TaskMetricAI.Backend.Tests/TestResults/m2-review-corrections-final.trx, ignored by Git. Direct/transitive audit completed with no known vulnerable packages across eight projects. Local build/audit execution and commands are recorded in docs/24; independent hosted evidence is recorded above.
+The signed app.apiBaseUrl is carried in request context and must equal `https://api.atlassian.com/ex/jira/{boundCloudId}` exactly; no caller URL is accepted. Require one opaque x-forge-oauth-user credential, applied per outbound request. `/myself` accountId must match the signed actor. Fetch issue ID/project metadata before content and recheck ID/project afterward. Jira's as-user issue GET enforces Browse Projects and issue-level security; even local administrators cannot bypass provider denial. No system-token fallback.
 
-| Security regression | Source references |
-| --- | --- |
-| Invalid Forge claims, installation binding, scope/role denial and IDOR | AuthenticationTests, AuthorizationTests, HttpSecurityTests |
-| A/B identical IDs, fallback-only access, corrupt/missing/ambiguous profiles | HttpSecurityTests.Resolution, ProfileResolutionTests |
-| Revoked grants, same-token/loaded-context authority, final administrator lock contention | HttpSecurityTests.Resolution |
-| DDL/TRUNCATE/RLS/role escalation denial and connection cancellation/reuse | RuntimeSecurityTests, RuntimeSettingsTests |
-| Invalid default isolation/schema/ACL/RLS, metadata access, public runtime rejection | RuntimePrerequisiteTests (13 negative mutations plus 2 runtime-session cases) |
-| Populated v2 data/history, approved manifest, rollback/replay, validated FKs | SchemaMigrationTests |
-| Assignment/archive locking, immutable history, cross-tenant relationships | ConcurrencyHardeningTests, RelationshipHardeningTests, PostgreSqlTests, PersistenceTests |
+The fixed DTO exposes only id, key, projectId, summary, nullable descriptionText and componentIds. Bounded, lossy ADF plain-text extraction omits unsupported nodes/attributes, marks/links, mentions, media and cards. No arbitrary JSON, comments, custom fields, attachments, user details or URLs are returned/fetched. GET-only fixed field requests use updateHistory=false. Bodies: 64 KiB actor/metadata, 1 MiB issue; JSON depth 32 and duplicate-name rejection; summary 1,024 characters, description 32,768 characters, 100 components and 10,000 ADF nodes. Invalid/excessive responses fail safely instead of truncating into success.
 
-The first startup-negative fixture attempted prohibited SET ROLE and failed; it was corrected without changing membership. Final tests use transactional owner-side metadata checks for the runtime role and verify the public runtime path separately. All temporary schema/ACL mutations roll back; migration_test_* schemas do not persist. No security tests were skipped.
+The provider workflow has a 15-second linked deadline including streaming; the route has a 20-second linked deadline covering authentication/database work too. No retries, redirect following, cookies or content/token caches. Jira HTTP factory logging and sensitive request/response diagnostic propagation are disabled. Transport/parser errors have safe messages without private inner exceptions. DTO/credential ToString methods are redacted. Trace-level API log tests and a real loopback HTTP diagnostic/EventSource test check synthetic secret/content sentinels. Normal no-store responses and indistinguishable forbidden/missing 404s remain; 429 supplies only a bounded numeric Retry-After delta, timeout 504, invalid provider data 502.
 
-## Current files versus historical records
+No persistence writes, migrations, role/database/password changes, new dependencies, infrastructure, Forge starter changes or M1 changes. A successful real-runtime API request was checked against complete before/after row snapshots for both synthetic tenants across every mapped tenant table, with no changes.
 
-The owner-approved checkpoint includes the complete cumulative M2 diff, not only the latest corrections. Review corrections touch RuntimeDatabase.cs, PostgreSqlHardening.cs, Infrastructure/AssemblyInfo.cs, Database/Program.cs, RuntimePrerequisiteTests.cs, SchemaMigrationTests.cs and HttpSecurityTests.Resolution.cs; docs/24 lists that bounded correction. Docs/25 records the complete checkpoint inventory and excluded artifact/configuration categories. Recheck git status before subsequent work and preserve any later changes.
+Modified code: Domain/Access.cs; Application/AuthenticateTenant.cs, Ports.cs and new JiraIssueService.cs; Infrastructure/Authentication/ForgeIdentityVerifier.cs and new JiraCloudReader.cs; Api/Program.cs. Tests: existing HttpSecurityTests.cs factory plus new JiraProviderTests.cs, JiraTelemetryTests.cs and HttpSecurityTests.Jira.cs. Documentation: this status, SESSION_HANDOFF.md, ARCHITECTURE_DECISIONS.md, ADR 0009 and README.md. Persistence/migration source, packages, SDK pin, CI, M1 and Forge starter remain unchanged.
 
-Historical evidence is intentionally retained in [docs/19](../19_M2_IDENTITY_AND_PERSISTENCE_INCREMENT.md), [docs/20](../20_M2_SECURITY_REVIEW.md), [docs/21](../21_M2_SECURITY_HARDENING_REPORT.md), [docs/22](../22_M2_API_BOUNDARY_REVIEW.md) and [docs/23](../23_M2_PROFILE_RESOLUTION_AND_REVOCATION.md). Their older counts, absent-feature descriptions, original schema/skip observations and hashes are historical, not current assertions. ADRs 0007/0008 and docs/24 supersede relevant older delivery details.
+## Local validation
 
-## Remaining limitations
+Final Release build passed with **0 warnings, 0 errors** using the pinned ignored SDK. Final combined run: **100 M1 + 187 backend = 287 passed, 0 failed, 0 skipped**. Backend comprises 86 offline unit/SQLite/model/loopback cases and 101 PostgreSQL/HTTP cases (59 HTTP). The increment adds 76 cases: 53 Jira provider cases, 1 real loopback diagnostic case and 22 HTTP/PostgreSQL cases. Backend finished 1 November 2026 at 20:11:54 +01:00. Both final TRX counters were checked; all required tests executed.
 
-Live Atlassian tokens/JWKS/HTTPS, provider entitlements, evaluation-result persistence/isolation and production TLS/credential deployment remain unverified or unimplemented. Hosted CI/fresh Linux bootstrap passed for the SHA above; repeatability beyond that run is not established. Scope-manifest review is an explicit operator responsibility. No claim of complete SaaS production readiness is made.
+Reports are ignored artifacts: both test projects' TestResults/m2-jira-read-final.trx, plus backend jira-focused.trx and jira-telemetry.trx. Commands: `.artifacts/dotnet/dotnet.exe build TaskMetricAI.sln -c Release --no-restore`; `test TaskMetricAI.sln -c Release --no-build --no-restore --logger 'trx;LogFileName=m2-jira-read-final.trx'`; `package list --project TaskMetricAI.sln --vulnerable --include-transitive --no-restore` with the same executable. Test connection references were supplied outside Git for the existing isolated taskmetricai_test only. The audit initially failed because sandbox networking blocked NuGet; its approved network-enabled retry completed with **no known vulnerable packages across eight projects**. No audit policy or package version changed.
+
+Two test-compilation issues in the new tests (an ambiguous logging extension type and EF's interpolated-raw-SQL diagnostic) were corrected before successful execution. The table-snapshot helper uses fixed model identifiers and a parameterized tenant; no warning suppression. No production invariant was weakened.
+
+Security coverage includes the existing full M1/M2 runtime/RLS/filter-bypass/privilege/concurrency/migration suites; Jira actor/tenant/project/issue substitution, same-FIT revocation, pre-provider authorization denial, concurrent tenant credentials with identical IDs, signed-base restrictions, allowlist projection, provider status/redirect handling, duplicate/malformed/oversized/streamed/deep content, ADF exclusions, bounded rate hints, actual provider deadline, streamed cancellation and log/diagnostic/error redaction. This is regression evidence, not measured full code coverage.
+
+## Remaining prerequisites and limits
+
+No live Jira/Atlassian FIT/JWKS/HTTPS request was made. HTTP tests replace Jira transport and signing keys, while retaining real verifier/binding/database authorization. The unchanged Forge Hello World app has no remote/appUserToken configuration. Live verification requires separately approved remote/HTTPS wiring, read scopes/consent (current classic read:jira-user and read:jira-work cover the chosen operations), exact app/environment/installation/cloud binding and canonical project registration/grants. Do not send credentials in chat or logs, deploy, reinstall or infer installation authority.
+
+Hosted CI for the Jira implementation is pending the authorized publication; baseline CI is recorded separately above. Production identities/TLS, credential lifecycle, upstream proxy/hosting observability, tenant quotas and deployment security review remain separate. The no-disclosure boundary covers configured application/transport behavior, not arbitrary process instrumentation or memory compromise. Text is untrusted; future consumers must preserve rendering/prompt boundaries. GitHub, evaluation persistence/isolation, Roslyn, AI and UI/publication remain separately scoped work. This is not full M2 completion or production sign-off.
+
+Next authorized action: publish only the reviewed increment with a normal push, monitor its exact-SHA CI, then synchronize verified evidence. If CI fails, investigate and stop for approval before corrections. No next feature or master change.

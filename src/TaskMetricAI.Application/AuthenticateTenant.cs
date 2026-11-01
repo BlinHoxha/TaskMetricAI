@@ -6,15 +6,15 @@ namespace TaskMetricAI.Application;
 public sealed class AuthenticatedTenant
 {
     public TenantIdentity Identity { get; }
-    internal AuthenticatedTenant(TenantIdentity identity) => Identity = identity;
+    public string? ApiBaseUrl { get; }
+    internal AuthenticatedTenant(TenantIdentity identity, string? apiBaseUrl)
+    { Identity = identity; ApiBaseUrl = apiBaseUrl; }
 }
 
 /// <summary>The tenant is selected only after token validation and an exact operator-provisioned binding.</summary>
 public sealed class AuthenticateTenant(IForgeIdentityVerifier verifier, IInstallationDirectory directory)
 {
-    public async Task<AuthenticatedTenant> AuthenticateAsync(string token, CancellationToken ct = default) =>
-        new(await ExecuteAsync(token, ct));
-    public async Task<TenantIdentity> ExecuteAsync(string token, CancellationToken ct = default)
+    public async Task<AuthenticatedTenant> AuthenticateAsync(string token, CancellationToken ct = default)
     {
         var verified = await verifier.VerifyAsync(token, ct);
         var identity = await directory.ResolveAsync(verified, ct);
@@ -22,6 +22,8 @@ public sealed class AuthenticateTenant(IForgeIdentityVerifier verifier, IInstall
         Require.That(identity!.ActorId == verified.ActorId && identity.AppId == verified.AppId &&
             identity.EnvironmentId == verified.EnvironmentId && identity.InstallationId == verified.InstallationId &&
             identity.CloudId == verified.CloudId, 401, "installation_identity_mismatch");
-        return identity;
+        return new(identity, verified.ApiBaseUrl);
     }
+    public async Task<TenantIdentity> ExecuteAsync(string token, CancellationToken ct = default) =>
+        (await AuthenticateAsync(token, ct)).Identity;
 }

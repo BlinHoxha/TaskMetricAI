@@ -24,11 +24,10 @@ public interface IForgeIdentityVerifier
 {
     Task<VerifiedForgeIdentity> VerifyAsync(string token, CancellationToken cancellationToken = default);
 }
-public sealed record JiraIssue(string Id, string Key, string ProjectId, string[] ComponentIds,
-    JsonElement Fields, JsonElement[] Comments);
 public interface IJiraReader
 {
-    Task<JiraIssue> ReadIssueAsync(TenantIdentity identity, string userToken, string issueId, CancellationToken cancellationToken = default);
+    Task<JiraIssue> ReadIssueAsync(AuthenticatedTenant tenant, JiraUserCredential credential, string projectId,
+        string issueId, CancellationToken cancellationToken = default);
 }
 public sealed record GitHubRepository(long Id, string Owner, string Name, string DefaultBranch);
 public interface IGitHubReader

@@ -78,7 +78,9 @@ public sealed class ForgeIdentityVerifier(ForgeOptions options, IForgeSigningKey
             if (installationObject.ValueKind == JsonValueKind.Object && installationObject.TryGetProperty("contexts", out var contexts))
                 Require.That(contexts.EnumerateArray().Any(c => c.TryGetProperty("cloudId", out var cloud) && cloud.GetString() == cloudId),
                     401, "invalid_forge_token");
-            return new(appId, environmentId, environmentType, installation, cloudId, actor);
+            // Retain only the signed claim. Jira additionally requires an exact commercial-cloud base.
+            var apiBaseUrl = app.TryGetProperty("apiBaseUrl", out var apiBase) ? apiBase.GetString() : null;
+            return new(appId, environmentId, environmentType, installation, cloudId, actor, apiBaseUrl);
         }
         catch (Exception ex) when (ex is SecurityTokenException or ArgumentException or JsonException or
                                    KeyNotFoundException or InvalidOperationException)

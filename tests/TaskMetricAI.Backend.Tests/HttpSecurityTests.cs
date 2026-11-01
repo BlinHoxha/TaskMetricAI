@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Logging;
 using TaskMetricAI.Application;
 using TaskMetricAI.Evaluation;
 using TaskMetricAI.Infrastructure.Authentication;
@@ -104,11 +105,17 @@ public sealed partial class HttpSecurityTests
         Assert.Equal((int)TaskMetricAI.Domain.AccessRole.EvaluationManager, state.RootElement.GetProperty("role").GetInt32());
     }
 
-    private sealed class ApiFactory(SecurityFixture fixture) : WebApplicationFactory<Program>
+    private sealed class ApiFactory(SecurityFixture fixture, HttpMessageHandler? jira = null,
+        Microsoft.Extensions.Logging.ILoggerProvider? logs = null) : WebApplicationFactory<Program>
     {
         protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
             builder.UseEnvironment("Testing");
+            if (logs is not null) builder.ConfigureLogging(logging =>
+            {
+                logging.SetMinimumLevel(LogLevel.Trace);
+                logging.AddProvider(logs);
+            });
             builder.ConfigureAppConfiguration((_, configuration) => configuration.AddInMemoryCollection(new Dictionary<string, string?>
             {
                 ["TASKMETRICAI_RUNTIME_CONNECTION_FILE"] = fixture.RuntimeFile,
@@ -116,7 +123,10 @@ public sealed partial class HttpSecurityTests
                 ["TASKMETRICAI_FORGE_ENVIRONMENTS"] = "DEVELOPMENT"
             }));
             builder.ConfigureServices(services =>
-            { services.RemoveAll<IForgeSigningKeys>(); services.AddSingleton<IForgeSigningKeys>(new SecurityFixture.Keys(fixture.Key)); });
+            {
+                services.RemoveAll<IForgeSigningKeys>(); services.AddSingleton<IForgeSigningKeys>(new SecurityFixture.Keys(fixture.Key));
+                if (jira is not null) services.AddHttpClient("jira").ConfigurePrimaryHttpMessageHandler(() => jira);
+            });
         }
     }
 }
