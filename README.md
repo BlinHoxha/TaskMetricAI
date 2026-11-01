@@ -1,6 +1,6 @@
 # TaskMetric AI
 
-Current M2 evidence: [implementation status](docs/context/IMPLEMENTATION_STATUS.md), [session handoff](docs/context/SESSION_HANDOFF.md) and [Jira read boundary](docs/adr/0009-bounded-jira-cloud-reads.md). The published foundation passed hosted CI; the bounded Jira issue-read backend is locally validated and approved for feature-branch publication and CI verification. Live Atlassian verification and Forge remote wiring remain pending. This is not full M2 completion or production readiness.
+Current M2 evidence: [implementation status](docs/context/IMPLEMENTATION_STATUS.md), [session handoff](docs/context/SESSION_HANDOFF.md) and [Jira read boundary](docs/adr/0009-bounded-jira-cloud-reads.md). The published foundation passed hosted CI; the bounded Jira issue-read backend is published on the feature branch and verified by hosted CI. Live Atlassian verification and Forge remote wiring remain pending. This is not full M2 completion or production readiness.
 
 **Jira Cloud + GitHub + .NET repository intelligence + explainable MCDA evaluation.**
 
@@ -24,7 +24,7 @@ This is TaskMetric AI, not the full DevScope AI platform. Documentation generati
 
 ## Approved administrator-controlled profiles and current scope
 
-Read [the profile addendum](docs/12_ADMIN_CONTROLLED_MCDA_PROFILES.md), [reconciled assessment](docs/11_ARCHITECTURAL_ASSESSMENT_AND_IMPLEMENTATION_PLAN.md), and [ADRs](docs/adr/0001-admin-controlled-profiles.md). Authorized administrators/evaluation managers own profile weights, rubrics, bands and mappings; AI proposes scores only. M0/M1 are approved. M2 identity/configuration/runtime security has a published hosted-validated checkpoint. The subsequent [bounded Jira issue-read backend](docs/adr/0009-bounded-jira-cloud-reads.md) is locally validated and approved for publication/CI verification on feature/m2-foundations. Forge remote wiring/live Atlassian verification, GitHub workflows and the later evaluation pipeline remain incomplete.
+Read [the profile addendum](docs/12_ADMIN_CONTROLLED_MCDA_PROFILES.md), [reconciled assessment](docs/11_ARCHITECTURAL_ASSESSMENT_AND_IMPLEMENTATION_PLAN.md), and [ADRs](docs/adr/0001-admin-controlled-profiles.md). Authorized administrators/evaluation managers own profile weights, rubrics, bands and mappings; AI proposes scores only. M0/M1 are approved. M2 identity/configuration/runtime security has a published hosted-validated checkpoint. The subsequent [bounded Jira issue-read backend](docs/adr/0009-bounded-jira-cloud-reads.md) is published and hosted-validated on feature/m2-foundations. Forge remote wiring/live Atlassian verification, GitHub workflows and the later evaluation pipeline remain incomplete.
 
 ## Build and use M1
 
@@ -42,7 +42,7 @@ dotnet test TaskMetricAI.sln -c Release --no-build --no-restore
 
 Production `TaskMetricAI.Evaluation` uses only the .NET base libraries. Tests use xUnit, its Visual Studio runner and Microsoft.NET.Test.Sdk; versions are centralized. No provider credentials, database or network are needed by the M1 tests after package restore. PostgreSQL-specific backend cases require the isolated test connection described below.
 
-See [engine contracts and usage](docs/MCDA_ENGINE_USAGE.md), the [original M0/M1 review](docs/13_M0_M1_REVIEW.md), and the [amendment review](docs/15_METRIC_CATALOG_ALIGNMENT_REVIEW.md). GitHub Actions builds and tests the solution. Published M2 tip 6d9a0be passed hosted CI with 211 tests. The reviewed Jira increment passes the local Release build and 287 tests (100 M1 + 187 backend, zero failed/skipped); its hosted CI and live Atlassian verification remain pending. Current evidence is in the status/handoff. The Forge Hello World starter remains unchanged.
+See [engine contracts and usage](docs/MCDA_ENGINE_USAGE.md), the [original M0/M1 review](docs/13_M0_M1_REVIEW.md), and the [amendment review](docs/15_METRIC_CATALOG_ALIGNMENT_REVIEW.md). GitHub Actions builds and tests the solution. Jira implementation f9e7dca passed [hosted CI](https://github.com/BlinHoxha/TaskMetricAI/actions/runs/41345307436) and local verification with a zero-warning/error Release build and 287 tests (100 M1 + 187 backend, zero failed/skipped); the dependency audit reported no known vulnerabilities. Live Atlassian verification remains pending. Current evidence is in the status/handoff. The Forge Hello World starter remains unchanged.
 
 ## M2 PostgreSQL test configuration
 
